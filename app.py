@@ -45,6 +45,10 @@ def encrypt_pdf():
             download_name='Encrypted.pdf'
         )
 
-    except Exception as e:
+        except Exception as e:
+        import traceback
+        error_details = traceback.format_exc()
+        print("PDF encryption error:\n", error_details)
         return f"Encryption failed: {str(e)}", 500
+
 
