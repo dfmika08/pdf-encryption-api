@@ -8,8 +8,9 @@ app = Flask(__name__)
 @app.route("/encrypt", methods=["POST"])
 def encrypt_pdf():
     try:
-        base64_pdf = request.json.get('file')
-        password = request.json.get('password')
+        data = request.get_json()
+        base64_pdf = data.get('file')
+        password = data.get('password')
 
         if not base64_pdf or not password:
             return "Missing 'file' or 'password'", 400
@@ -28,13 +29,10 @@ def encrypt_pdf():
         writer.write(output_stream)
         output_stream.seek(0)
 
-        # Return raw binary with correct headers for Apex
         return Response(
             output_stream.read(),
             mimetype="application/pdf",
-            headers={
-                "Content-Disposition": "attachment; filename=Encrypted.pdf"
-            }
+            headers={"Content-Disposition": "attachment; filename=Encrypted.pdf"}
         )
 
     except Exception as e:
