@@ -1,14 +1,7 @@
-from flask import Flask, request, Response
-from PyPDF2 import PdfReader, PdfWriter
-from io import BytesIO
-import base64
-
-app = Flask(__name__)
-
 @app.route("/encrypt", methods=["POST"])
 def encrypt_pdf():
     try:
-        data = request.get_json()
+        data = request.get_json()  # ⬅️ must be this, not request.form!
         base64_pdf = data.get('file')
         password = data.get('password')
 
@@ -37,6 +30,3 @@ def encrypt_pdf():
 
     except Exception as e:
         return f"Encryption failed: {str(e)}", 500
-
-if __name__ == "__main__":
-    app.run(debug=True)
