@@ -7,28 +7,22 @@ app = Flask(__name__)
 
 @app.route("/encrypt", methods=["POST"])
 def encrypt_pdf():
-    import signal
-
-    # Timeout protection (9 seconds max for Salesforce)
-    def timeout_handler(signum, frame):
-        raise TimeoutError("Encryption process took too long")
-
-    signal.signal(signal.SIGALRM, timeout_handler)
-    signal.alarm(8)  # seconds
-
     try:
-        base64_pdf = request.json.get('file')
-        password = request.json.get('password')
+        # Get the base64-encoded PDF string and password from JSON body
+        data = request.get_json()
+        base64_pdf = data.get('file')
+        password = data.get('password')
 
         if not base64_pdf or not password:
-            return "Missing 'file' (base64 PDF) or 'password'", 400
+            return "Missing 'file' or 'password'", 400
 
+        # Decode the PDF from base64
         pdf_bytes = base64.b64decode(base64_pdf)
         input_stream = BytesIO(pdf_bytes)
 
+        # Read and re-write the PDF with encryption
         reader = PdfReader(input_stream)
         writer = PdfWriter()
-
         for page in reader.pages:
             writer.add_page(page)
 
@@ -45,10 +39,5 @@ def encrypt_pdf():
             download_name='Encrypted.pdf'
         )
 
-        except Exception as e:
-        import traceback
-        error_details = traceback.format_exc()
-        print("PDF encryption error:\n", error_details)
+    except Exception as e:
         return f"Encryption failed: {str(e)}", 500
-
-
