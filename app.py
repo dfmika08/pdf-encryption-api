@@ -7,6 +7,15 @@ app = Flask(__name__)
 
 @app.route("/encrypt", methods=["POST"])
 def encrypt_pdf():
+    import signal
+
+    # Timeout protection (9 seconds max for Salesforce)
+    def timeout_handler(signum, frame):
+        raise TimeoutError("Encryption process took too long")
+
+    signal.signal(signal.SIGALRM, timeout_handler)
+    signal.alarm(8)  # seconds
+
     try:
         base64_pdf = request.json.get('file')
         password = request.json.get('password')
